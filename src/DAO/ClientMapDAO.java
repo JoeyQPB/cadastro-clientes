@@ -36,14 +36,10 @@ public class ClientMapDAO implements IClientDAO {
 
 	@Override
 	public Client update(Client client) {
-		Client clienteCadastrado = getClient(client.getCpf());
-		clienteCadastrado.setCel(client.getCel());
-		clienteCadastrado.setCidade(client.getCidade());
-		clienteCadastrado.setEnd(client.getEnd());
-		clienteCadastrado.setEstado(client.getEstado());
-		clienteCadastrado.setName(client.getName());
-		clienteCadastrado.setNumero(client.getNumero());
-		return null;
+		Long cpfClient = client.getCpf();
+		if (getClient(cpfClient) == null) return null;
+		repositoryInMemory.put(cpfClient, client);
+		return getClient(cpfClient);
 	}
 
 	@Override

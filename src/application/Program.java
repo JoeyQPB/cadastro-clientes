@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.swing.JOptionPane;
 
 import DAO.ClientMapDAO;
+import DAO.ClientSetDAO;
 import DAO.IClientDAO;
 import domain.Client;
 
@@ -15,6 +16,7 @@ public class Program {
 	private static String title = " ## SISTEMA DE USUÁRIOS ##";
 	
 	public static void main(String[] args) {
+//		clientDAO = new ClientSetDAO();
 		clientDAO = new ClientMapDAO();
 		runProgram();
 	}
@@ -70,7 +72,7 @@ public class Program {
 		
 		Boolean isCreated = clientDAO.create(newClient);
 		String msg = (isCreated != null)
-				? msg = "Client: " + newClient.getName() + " - CPF: " + newClient.getCpf() + ", foi cadastrado!"
+				? "Client: " + newClient.getName() + " - CPF: " + newClient.getCpf() + ", foi cadastrado!"
 				: "Client com CPF: " + newClient.getCpf()+ " já está cadastrado! Consulte para mais informações.";
 
 		JOptionPane.showMessageDialog(null, msg, "## CADASTRO", JOptionPane.INFORMATION_MESSAGE);
@@ -82,7 +84,7 @@ public class Program {
 		if (clients.size() < 0) msg.append("Ainda não há clientes cadastrados!");
 		else {
 			msg.append("Usuários Cadastrados:");
-			msg.append("\n\n");
+			msg.append("\n");
 			for (Client c : clients) {
 				msg.append("\n\n");
 				msg.append(c.toString());
@@ -100,19 +102,29 @@ public class Program {
 	}
 
 	private static void optionUpdate() {
-		//pegar cpf
-//		Client client = formClientUpdate();
-//		if (isNull(client)) return; 
-//		String msg;
-//		if (clientDAO.getClient(client.getCpf()) == null) msg = "Client não encontrado";
-//		else {
-//			Client clientUpdated = clientDAO.update(client);
-//			msg = clientUpdated.toString();
-//		}
-//		JOptionPane.showMessageDialog(null, msg , title, JOptionPane.INFORMATION_MESSAGE);
+		Long clientCpf = getCpf();
+		if (isNull(clientCpf)) return;
+		Client client = clientDAO.getClient(clientCpf);
+		String msg = (client != null) ? client.toString() + " esse é o cliente que deseja atualizar?\n(1 - sim | 2 - não)" : "Cliene não encontrado";
+		String answer = JOptionPane.showInputDialog(null, msg, title, JOptionPane.INFORMATION_MESSAGE);
+		if (isNull(answer)) return; 
+		else if (answer.trim().equals("1")) {
+			Client updateData = formUpdateClient(clientCpf);
+			if (isNull(updateData)) return; 
+			Client clientUpdated = clientDAO.update(updateData);
+			msg = (clientUpdated != null) ? clientUpdated.toString() : "Algo deu errado";
+			JOptionPane.showMessageDialog(null, msg, "## CADASTRO", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		else if (answer.trim().equals("2")) {
+			optionUpdate();
+			return;
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "Resposta inválida!" , title, JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
 	}
-
-
 
 	private static void optionDelete() {
 		Long clientCpf = getCpf();
@@ -137,7 +149,7 @@ public class Program {
 	}
 	
 	private static void cancelOption() {
-		JOptionPane.showMessageDialog(null, "Processo Cancelado", title, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, "Algo não ocorreu como esperado.\nProcesso cancelado!", title, JOptionPane.INFORMATION_MESSAGE);
 		exit = true;
 		return;
 	}
@@ -147,44 +159,71 @@ public class Program {
 				+ "nome, celular, cpf, endereço, número, cidade, estado\n"
 				+ "(ex: "
 				+ "Jhon Doe, 11999990000, 00000000000, rua dos bobos, 0, Salvador, Bahia)\n\n";
+		
 		String clientString = JOptionPane.showInputDialog(null, formMsg, title, JOptionPane.INFORMATION_MESSAGE);
 		if (clientString == null) return null;
 		String[] clientFields = clientString.split(",");
+		if (clientFields.length != 7) return null;
+		
 		for (int i = 0; i < clientFields.length; i++) {
 			clientFields[i] = clientFields[i].trim();
 		}
-
-		// TO-DO: verify fields 
+		
+		if (!verifyType(clientFields[0], String.class)) return null;
+		if (!verifyType(clientFields[1], Long.class)) return null;
+		if (!verifyType(clientFields[2], Long.class)) return null;
+		if (!verifyType(clientFields[3], String.class)) return null;
+		if (!verifyType(clientFields[4], Integer.class)) return null;
+		if (!verifyType(clientFields[5], String.class)) return null;
+		if (!verifyType(clientFields[6], String.class)) return null;
+		
 		return new Client(clientFields[0], Long.valueOf(clientFields[1]), Long.valueOf(clientFields[2]),
 				clientFields[3], Integer.parseInt(clientFields[4]), clientFields[5], clientFields[6]);
 	}
 	
-//	private static Client formClientUpdate() {
-//		String formMsg = "Insira os dados do cliente separados por virgula:\n"
-//				+ "nome, celular, cpf, endereço, número, cidade, estado\n"
-//				+ "(ex: "
-//				+ "Jhon Doe, 11999990000, rua dos bobos, 0, Salvador, Bahia)\n\n";
-//		String clientString = JOptionPane.showInputDialog(null, formMsg, title, JOptionPane.INFORMATION_MESSAGE);
-//		if (clientString == null) return null;
-//		String[] clientFields = clientString.split(",");
-//		for (int i = 0; i < clientFields.length; i++) {
-//			clientFields[i] = clientFields[i].trim();
-//		}
-//
-//		// TO-DO: verify fields 
-//		return new Client(clientFields[0], Long.valueOf(clientFields[1]), clientFields[2],
-//				Integer.parseInt(clientFields[3]), clientFields[4], clientFields[5]);
-//	}
+	private static Client formUpdateClient(Long cpf) {
+		String formMsg = "Insira os novos dados para o cliente separados por virgula:\n"
+				+ "nome, celular, endereço, número, cidade, estado\n"
+				+ "(ex: "
+				+ "Jhon Doe, 11999990000, rua dos bobos, 0, Salvador, Bahia)\n\n";
+		String clientString = JOptionPane.showInputDialog(null, formMsg, title, JOptionPane.INFORMATION_MESSAGE);
+		if (clientString == null) return null;
+		String[] clientFields = clientString.split(",");
+		if (clientFields.length != 6) return null;
+		
+		for (int i = 0; i < clientFields.length; i++) {
+			clientFields[i] = clientFields[i].trim();
+		}
+		
+		if (!verifyType(clientFields[0], String.class)) return null;
+		if (!verifyType(clientFields[1], Long.class)) return null;
+		if (!verifyType(clientFields[2], String.class)) return null;
+		if (!verifyType(clientFields[3], Integer.class)) return null;
+		if (!verifyType(clientFields[4], String.class)) return null;
+		if (!verifyType(clientFields[5], String.class)) return null;
+		
+		return new Client(clientFields[0], Long.valueOf(clientFields[1]), cpf, clientFields[2],
+				Integer.parseInt(clientFields[3]), clientFields[4], clientFields[5]);
+	}
 	
 	private static Long getCpf() {
 		String getCpfMsg = "Informe o CPF:\n"
 				+ "(ex: 00000000000)";
 		String cpfString = JOptionPane.showInputDialog(null, getCpfMsg, title, JOptionPane.INFORMATION_MESSAGE);
-		
-		// TO-DO: verify cpf
-		if (cpfString == null) return null;
-		
-		return Long.parseLong(cpfString);
+		return stringToLong(cpfString);
 	}
-
+	
+    public static Long stringToLong(String input) {
+        try {
+            return Long.parseLong(input);
+        } catch (NumberFormatException e) {
+            System.err.println("Erro ao converter para Long: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    public static <T> boolean verifyType(Object var, Class<T> typeOfVar) {
+    	if (isNull(var)) return false;
+        return typeOfVar.isInstance(var);
+    }
 }

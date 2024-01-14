@@ -16,8 +16,7 @@ public class ClientSetDAO implements IClientDAO {
 
 	@Override
 	public Boolean create(Client client) {
-		repositoryInMemory.add(client);
-		return null;
+		return repositoryInMemory.add(client);
 	}
 
 	@Override
@@ -33,13 +32,8 @@ public class ClientSetDAO implements IClientDAO {
 	@Override
 	public Client update(Client client){
 		Long cpfClient = client.getCpf();
-		
-		if (getClient(cpfClient) != null) {
-			System.out.println("Client not found");
-			return null;
-		}
-		
-		repositoryInMemory.stream().forEach((el) -> {
+		if (getClient(cpfClient) == null) return null;
+		for (Client el : repositoryInMemory) {
 			if (el.getCpf().equals(cpfClient)) {
 				el.setCel(client.getCel());
 				el.setCidade(client.getCidade());
@@ -47,9 +41,9 @@ public class ClientSetDAO implements IClientDAO {
 				el.setEstado(client.getEstado());
 				el.setName(client.getName());
 				el.setNumero(client.getNumero());
+				break;
 			};
-		});
-		
+		}
 		return getClient(cpfClient);
 	}
 
