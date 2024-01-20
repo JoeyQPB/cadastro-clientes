@@ -169,16 +169,20 @@ public class Program {
 			clientFields[i] = clientFields[i].trim();
 		}
 		
+		Long celNum = Long.valueOf(clientFields[1]);
+		Long numCPF = Long.valueOf(clientFields[2]);
+		Integer numEnd = Integer.valueOf(clientFields[4]);
+		
 		if (!verifyType(clientFields[0], String.class)) return null;
-		if (!verifyType(clientFields[1], Long.class)) return null;
-		if (!verifyType(clientFields[2], Long.class)) return null;
+		if (!verifyType(celNum, Long.class)) return null;
+		if (!verifyType(numCPF, Long.class)) return null;
 		if (!verifyType(clientFields[3], String.class)) return null;
-		if (!verifyType(clientFields[4], Integer.class)) return null;
+		if (!verifyType(numEnd, Integer.class)) return null;
 		if (!verifyType(clientFields[5], String.class)) return null;
 		if (!verifyType(clientFields[6], String.class)) return null;
 		
-		return new Client(clientFields[0], Long.valueOf(clientFields[1]), Long.valueOf(clientFields[2]),
-				clientFields[3], Integer.parseInt(clientFields[4]), clientFields[5], clientFields[6]);
+		return new Client(clientFields[0], celNum, numCPF, clientFields[3], numEnd,
+						  clientFields[5], clientFields[6]);
 	}
 	
 	private static Client formUpdateClient(Long cpf) {
@@ -195,15 +199,18 @@ public class Program {
 			clientFields[i] = clientFields[i].trim();
 		}
 		
+		Long celNum = Long.valueOf(clientFields[1]);
+		Integer numEnd = Integer.valueOf(clientFields[3]);
+		
 		if (!verifyType(clientFields[0], String.class)) return null;
-		if (!verifyType(clientFields[1], Long.class)) return null;
+		if (!verifyType(celNum, Long.class)) return null;
 		if (!verifyType(clientFields[2], String.class)) return null;
-		if (!verifyType(clientFields[3], Integer.class)) return null;
+		if (!verifyType(numEnd, Integer.class)) return null;
 		if (!verifyType(clientFields[4], String.class)) return null;
 		if (!verifyType(clientFields[5], String.class)) return null;
 		
-		return new Client(clientFields[0], Long.valueOf(clientFields[1]), cpf, clientFields[2],
-				Integer.parseInt(clientFields[3]), clientFields[4], clientFields[5]);
+		return new Client(clientFields[0], celNum, cpf, clientFields[2],
+						  numEnd, clientFields[4], clientFields[5]);
 	}
 	
 	private static Long getCpf() {
